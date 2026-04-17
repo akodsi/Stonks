@@ -188,7 +188,11 @@ def ingest_earnings_transcripts(symbol: str, limit: int = 4) -> int:
     try:
         transcripts = fetch_fmp_earnings_transcripts(symbol, limit)
     except Exception as e:
-        print(f"[transcripts] FMP fetch failed for {symbol}: {e}")
+        # Scrub the api key from the error message — FMP requires it in the
+        # URL query string, so HTTPError messages contain it verbatim.
+        key = os.getenv("FMP_API_KEY", "")
+        msg = str(e).replace(key, "***REDACTED***") if key else str(e)
+        print(f"[transcripts] FMP fetch failed for {symbol}: {msg}")
         return 0
 
     CHUNK_SIZE = 2000  # characters per chunk

@@ -297,7 +297,10 @@ def ingest_news(symbol: str, page_size: int = 30) -> int:
             fetched_total += len(newsapi_articles)
             articles.extend(newsapi_articles)
         except Exception as e:
-            print(f"[news] NewsAPI fetch failed for {symbol}: {e}")
+            # Scrub the api key from the exception message — requests includes
+            # the full URL (with query params) in HTTPError messages.
+            msg = str(e).replace(api_key, "***REDACTED***")
+            print(f"[news] NewsAPI fetch failed for {symbol}: {msg}")
     else:
         print("[news] NEWS_API_KEY not set — using RSS feeds only.")
 
